@@ -1,113 +1,91 @@
 <script>
-  import FirstComponent from "./Components/FirstComponent.svelte";
-  import BindingForm from "./Components/bindingForm.svelte";
-  import Hooks from "./Components/hooks.svelte";
-  // import Dispatcher from "./Components/FirstDispatcher.svelte";
-  import Second from "./Components/second.svelte";
-  import Table from "./Components/table.svelte";
-  // import Addbook from "./Components/Addbook.svelte";
-  import Assignment1 from "./Components/Assignment1.svelte";
+  import { setContext } from "svelte";
 
-  // export let name;
-  let dat = "Props example";
+  //component
+  import Navbar from "./Navbar.svelte";
+  import ExpenseList from "./ExpenseList.svelte";
+  import Totals from "./Totals.svelte";
+  import ExpenseForm from "./ExpenseForm.svelte";
+  //data
+  import expensesData from "./expenses";
+  // import Abc from "./Abc.svelte";
 
-  function handleMessage(event) {
-    alert(event.detail.Text);
-  }
-  function handleMessage1(event) {
-    alert(event.detail.Data);
-  }
-  let one = false;
-  function oneHeader() {
-    one = !one;
-  }
+  //variable
+  let expenses = [...expensesData];
+  //set editing variables
+  let setName = "";
+  let setAmount = null;
+  let setId = null;
+  //reactive
+  $: isEditing = setId ? true : false;
+  $: total = expenses.reduce((acc, curr) => {
+    return (acc += curr.amount);
+  }, 0);
 
-  // import Book from "./Components/book.svelte";
-  // let title = "";
-  // let pages = 0;
-  // let description = "";
-  // function setTitle(event) {
-  //   title = event.target.value;
-  // }
+  //functions
+  function removeExpense(id) {
+    expenses = expenses.filter((item) => item.id !== id);
+  }
+  function clearExpenses() {
+    expenses = [];
+  }
+  function addExpense({ name, amount }) {
+    let expense = { id: Math.random() * Date.now(), name, amount };
+    expenses = [expense, ...expenses];
+  }
+  function setModifiedExpense(id) {
+    let expense = expenses.find((item) => item.id === id);
+
+    setId = expense.id;
+    setName = expense.name;
+    setAmount = expense.amount;
+  }
+  function editExpense({ name, amount }) {
+    console.log({ name, amount });
+  }
+  //context
+  setContext("remove", removeExpense);
+  setContext("modify", setModifiedExpense);
+  //
+
+  // import Example from "./Example.svelte";
+  //  Each_block
+  // let fruits = ["apple", "orange", "lemon"];
+  // import Title from "./Title.svelte";
 </script>
 
-<main>
-  <button on:click={oneHeader}> Click here to load Header</button>
+<Navbar />
 
-  {#if one}
-    <FirstComponent />
-  {/if}
-
-  <h1>{dat}</h1>
-
-  <Table /> <br /><br /><br />
-
-  <Second on:message={handleMessage} />
-  <Second on:message={handleMessage1} />
-
-  <!-- <Dispatcher on:message={handleMessage}></Dispatcher> -->
-  <!-- <Hooks /> -->
-  <BindingForm />
-<!-- 
-  <section>
-    <div>
-      <label for="title">Title</label>
-      <input type="text" id="title" value={title} on:input={setTitle} />
-    </div>
-    <div>
-      <label for="pages"> pages</label>
-      <input type="number" id="price" bind:value={pages} />
-    </div>
-    <div>
-      <label for="description">Description</label>
-      <textarea rows="3" id="description" bind:value={description} />
-    </div>
-  </section> -->
-  <!-- <Book bookTitle={title} bookPages={pages} bookDescription={description} />. -->
-
-  <!-- {#if Book.length === 0}
-    <p>Add a new book</p>
-  {:else}
-    {#each Book as book}
-      <Book
-        bookTitle={book.title}
-        bookPages={book.pages}
-        bookDescription={book.description}
-      />
-    {/each}
-  {/if} -->
-
-  <!-- <Button on:click={addBook}>ADD Book</Button> -->
-  <!-- <Addbook on:click={setTitle} /> -->
-
-  <Assignment1></Assignment1>
+<main class="content">
+  <ExpenseForm
+    {addExpense}
+    name={setName}
+    amount={setAmount}
+    {isEditing}
+    {editExpense}
+  />
+  <Totals title="total expenses" {total} />
+  <!-- example of props drilling (passing a functionas as props is called props drilling) -->
+  <ExpenseList {expenses} />
+  <button
+    type="button"
+    class="btn btn-primary btn-block"
+    on:click={clearExpenses}
+  >
+    clear expenses
+  </button>
 </main>
 
-<style>
-  main {
-    /* text-align: center; */
-    padding: 1em;
-    max-width: 240px;
-    margin: 0 auto;
-    background-color: rgb(179, 177, 173);
-  }
+<!-- <Abc name={"Pratiksha"}/> -->
 
-  h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
-    font-size: 4em;
-    font-weight: 100;
-    text-align: center;
-  }
-  button {
-    color: yellow;
-    background-color: rgb(103, 10, 10);
-    border-radius: 30%;
-  }
-  
-  @media (min-width: 640px) {
-    main {
-      max-width: none;
-    }
-  }
-</style>
+<!-- <Title title="add expense" />
+<Title title="expense list" />
+<Title />
+<Example />
+<span>Hello from app</span> -->
+
+<!-- Each_block -->
+<!-- {#each fruits as item }  -->
+<!-- <h1>fruit : {item}</h1> .... comment import title -->
+<!-- <Title title={item} />
+{/each} -->
